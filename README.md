@@ -1,1 +1,3 @@
-# cpp_vk2023
+# Бекетов Роман
+# ML-11
+# Георгий Седойкин https://github.com/GeorgiyX
