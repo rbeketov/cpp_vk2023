@@ -1,17 +1,16 @@
 #include "pars_input.h"
 #include "exeption.h"
 
-const static std::string kNumber = "0123456789";
-const static std::string kUnsucEx = "Unsuccessful execution of a program";
+static const char* kNumber = "0123456789";
+static const char* kUnsucEx = "Unsuccessful execution of a program";
 
-parse::ParseTSV& parseInput(int argc, char *argv[]) {
+
+parse::ParseTSV* parseInput(int argc, char *argv[]) {
     std::string pathRating = "";
     std::string pathBasics = "";
     std::string pathAkas = "";
     size_t numMinut = 0;
-
     try {
-
         if (argc != 5) {
             throw parse::InvalidArgumentsCnt(argc);
         }
@@ -60,7 +59,6 @@ parse::ParseTSV& parseInput(int argc, char *argv[]) {
                 throw parse::InvalidArguments();
             }
         }
-
     } catch (const parse::ParseException& e) {
         std::cerr << e.what() << std::endl;
         std::exit(EXIT_FAILURE);
@@ -72,7 +70,7 @@ parse::ParseTSV& parseInput(int argc, char *argv[]) {
         std::exit(EXIT_FAILURE);
     }
 
-    parse::ParseTSV* tsvDump = new parse::ParseTSV(pathBasics, pathRating, pathAkas, numMinut);    
-    return *tsvDump;
+    parse::ParseTSV* tsvDump = new parse::ParseTSV(pathBasics, pathRating, pathAkas, numMinut);
+    return tsvDump;
 }
- 
+

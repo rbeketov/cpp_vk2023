@@ -5,4 +5,4 @@
 #include <getopt.h>
 #include <iostream>
 
-parse::ParseTSV& parseInput(int argc, char *argv[]);
+parse::ParseTSV* parseInput(int argc, char *argv[]);

@@ -35,7 +35,7 @@ class InvalidArguments: public ParseException {
  public:
   InvalidArguments()
   : ParseException(R"(Invalid arguments at start\nExample:
-                    ./pars --basicsDump={path} --ratingsDump={path} --akaDump={path} --numMin={unsign})") {}
+                    ./pars --basicsDump={path} --ratingsDump={path} --akasDump={path} --numMin={unsign})") {}
 };
 
 class InvalidArgumentsNum: public ParseException {
