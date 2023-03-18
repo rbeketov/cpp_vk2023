@@ -1,4 +1,4 @@
-Вариант #3
+#Вариант #3
 Необходимо разработать программу, которая обрабатывает данные онлайн сервиса IMDB.
 Датасеты можно скачать на официальном сайте IMDB https://datasets.imdbws.com/
 Описание датасетов находится по ссылке https://www.imdb.com/interfaces/
@@ -16,5 +16,5 @@ gunzip title.basics.tsv.gz
 Вывести русские названия (при наличии) 10 самых рейтинговых фильмов, длительность которых не превышает числа минут, переданных в аргументах командной строки
 
 
-start exe:
-<pre>      $ ./pars —basicsDump=../data/title.basics.tsv —ratingsDump=../data/title.ratings.tsv —akasDump=../data/title.akas.tsv —numMin=60 </pre>
+<strong>start exe:</strong>
+<pre>$ ./pars —basicsDump=../data/title.basics.tsv —ratingsDump=../data/title.ratings.tsv —akasDump=../data/title.akas.tsv —numMin=60 </pre>
