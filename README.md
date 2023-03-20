@@ -16,5 +16,22 @@
 Вывести русские названия (при наличии) 10 самых рейтинговых фильмов, длительность которых не превышает числа минут, переданных в аргументах командной строки
 
 
-<strong>start exe:</strong>
-<pre>$ ./pars —basicsDump=../data/title.basics.tsv —ratingsDump=../data/title.ratings.tsv —akasDump=../data/title.akas.tsv —numMin=60 </pre>
+<strong>Руководство: </strong>
+<pre> Первым делом нужно скачать дампы:
+             $ ./download_dump.sh
+      Сборка:
+             $ make build
+      Запустить поиск 10 самых рейтинговых фильмов, длительность которых не превышает 60 минут:
+             $ ./start.sh
+      
+      Пересобрать:
+             $ make rebuild
+             или
+             $ make clean
+             $ make build
+      Запуск линтеров:
+             $ make check
+      Запуск тестов: 
+             $ make test
+             $ make memtest
+</pre>
