@@ -1,0 +1,6 @@
+.DS_Store
+.vscode
+/build
+/data
+test.sh
+valgrind.log
