@@ -16,12 +16,19 @@ FetchContent_Declare(
   GIT_TAG release-1.12.1
 )
 
+include_directories(include)
+
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 find_package(GTest REQUIRED)
 
-add_executable(${PROJECT_NAME} ${SOURCES}/src/)
+ADD_EXECUTABLE(
+        ${PROJECT_NAME}
+        src/main.cpp
+        src/test_base.cpp
+)
+
 target_include_directories(${PROJECT_NAME} PUBLIC ${LOGIC_INCLUDE_DIRS} ${NET_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${LOGIC_LIBRARIES} ${NET_LIBRARIES} GTest::gtest_main GTest::gmock)
 
@@ -29,16 +36,15 @@ target_link_libraries(${PROJECT_NAME} ${LOGIC_LIBRARIES} ${NET_LIBRARIES} GTest:
 SET(memcheck_command)
 
 if (WITH_MEMCHECK)
-    message("Memcheck enabled")
-    set(memcheck_command "${CMAKE_SOURCE_DIR}/memtest.sh")
+        message("Memcheck enabled")
+        SET(memcheck_command ${CMAKE_SOURCE_DIR}/memtest.sh)
 else()
-    message("Memcheck disabled")
+        message("Memcheck disabled")
 endif()
 
 SET (TEST_COMMAND ${memcheck_command} ${CMAKE_BINARY_DIR}/project/tests/tests)
 
-message("TEST_COMMAND = ${TEST_COMMAND}")
-
-add_test(
-    NAME ${PROJECT_NAME}
-    COMMAND ${TEST_COMMAND} ${CMAKE_SOURCE_DIR}/project/tests/)
+ADD_TEST(
+        NAME BaseTest
+        COMMAND ${TEST_COMMAND} ${CMAKE_SOURCE_DIR}/project/tests/data --gtest_filter=-*Extra*
+)

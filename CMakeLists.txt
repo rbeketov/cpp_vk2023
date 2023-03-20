@@ -16,4 +16,4 @@ ADD_EXECUTABLE(pars project/src/pars_movies.cpp project/src/main.cpp project/src
 
 ENABLE_TESTING()
 
-ADD_SUBDIRECTORY(project/tests)
+ADD_SUBDIRECTORY(project)

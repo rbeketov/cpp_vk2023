@@ -1,5 +1,5 @@
 #include "pars_input.h"
-#include "exeption.h"
+#include "exceptions.h"
 
 static const char* kNumber = "0123456789";
 static const char* kUnsucEx = "Unsuccessful execution of a program";

@@ -21,8 +21,8 @@ class ParseException: public std::exception {
 
 class InvalidPath: public ParseException {
  public:
-  InvalidPath()
-      : ParseException("Cannot open file") {}
+  InvalidPath(std::string path)
+      : ParseException("Cannot open file " + path) {}
 };
 
 class InvalidArgumentsCnt: public ParseException {
@@ -34,7 +34,8 @@ class InvalidArgumentsCnt: public ParseException {
 class InvalidArguments: public ParseException {
  public:
   InvalidArguments()
-  : ParseException(R"(Invalid arguments at start\nExample:
+  : ParseException(R"(Invalid arguments at start
+                    Example:
                     ./pars --basicsDump={path} --ratingsDump={path} --akasDump={path} --numMin={unsign})") {}
 };
 

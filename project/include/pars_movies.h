@@ -1,5 +1,6 @@
 #pragma once // NOLINT
 
+#include <locale>
 #include <cstring>
 #include <algorithm>
 #include <iostream>
@@ -12,10 +13,7 @@
 
 namespace parse {
 
-typedef std::unordered_map<std::string, std::vector<std::string> > Hash;
-
-typedef bool (*checkCorrectComp)(const std::vector<std::string>&);
-
+using Hash = std::unordered_map<std::string, std::vector<std::string> >;
 
 // Comparator
 class Comparator {

@@ -1,5 +1,5 @@
 #include "pars_movies.h"
-#include "exeption.h"
+#include "exceptions.h"
 
 static const char* kUnsucEx = "Unsuccessful execution of a program";
 static const size_t kSizeTop = 10;
@@ -82,16 +82,18 @@ namespace parse {
     std::ifstream openFile(const std::string& path) {
         std::ifstream data(path);
         if (data.eof() || data.bad() || !data.is_open()) {
-            throw InvalidPath();
+            throw InvalidPath(path);
         }
         return data;
     }
 
     std::vector<std::string> strToVec(const std::string& buffer) {
+        std::vector<std::string> words;
         std::stringstream streamBuffer(buffer);
-        std::istream_iterator<std::string> begin(streamBuffer);
-        std::istream_iterator<std::string> end;
-        std::vector<std::string> words(begin, end);
+        std::string tmpBuffer = "";
+        while (std::getline(streamBuffer, tmpBuffer, '\t')) {
+            words.push_back(tmpBuffer);
+        }
         return words;
     }
 
