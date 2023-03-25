@@ -7,6 +7,7 @@ SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -O0")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -coverage -lgcov" )
 
+
 FILE(GLOB SOURCES *.cpp)
 
 INCLUDE(FetchContent)
@@ -32,7 +33,7 @@ ADD_EXECUTABLE(
 )
 
 
-target_link_libraries(${PROJECT_NAME} GTest::gtest_main GTest::gmock)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} GTest::gtest_main GTest::gmock)
 
 
 SET(memcheck_command)
