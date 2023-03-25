@@ -72,7 +72,6 @@ namespace parse {
             std::cerr << e.what() << std::endl;
         } catch (...) {
             std::cerr << kUnsucEx <<  std::endl;
-            std::exit(EXIT_FAILURE);
         }
     }
 

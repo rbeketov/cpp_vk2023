@@ -21,7 +21,7 @@ class ParseException: public std::exception {
 
 class InvalidPath: public ParseException {
  public:
-  InvalidPath(std::string path)
+  explicit InvalidPath(std::string path)
       : ParseException("Cannot open file " + path) {}
 };
 

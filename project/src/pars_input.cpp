@@ -61,13 +61,10 @@ parse::ParseTSV* parseInput(int argc, char *argv[]) {
         }
     } catch (const parse::ParseException& e) {
         std::cerr << e.what() << std::endl;
-        std::exit(EXIT_FAILURE);
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
-        std::exit(EXIT_FAILURE);
     } catch (...) {
         std::cerr << kUnsucEx <<  std::endl;
-        std::exit(EXIT_FAILURE);
     }
 
     parse::ParseTSV* tsvDump = new parse::ParseTSV(pathBasics, pathRating, pathAkas, numMinut);
