@@ -1,31 +1,119 @@
 #include "pars_movies.h"
 #include "exceptions.h"
 
-static const char* kUnsucEx = "Unsuccessful execution of a program";
-static const size_t kSizeTop = 10;
-static const size_t kSizeResultVec = 10;
+static const char kSeparator = '\t';
+static const size_t kNumOfPrimaryTitle = 0;
+static const size_t kNumOfTitleId = 0;
+static const size_t kNumOfRatings = 1;
+static const size_t kSizeResultVec = 2;
+static const size_t kNumOfRuTitle = 2;
+static const size_t kNumOfPrimaryTitleBasics = 2;
 
+static const std::string kRuTag = "RU";
+static const std::string kFlagNonAdult = "0";
+static const std::string kMovie = "movie";
+static const std::string kNumber = "0123456789";
+static const size_t kNumVotesCorrVal = 1000;
+
+static const size_t kSizeBasicsDump = 9;
+static const std::string kTconst = "tconst";
+static const std::string kTitleType = "titleType";
+static const std::string kPrimaryTitle = "primaryTitle";
+static const std::string kOriginalTitle = "originalTitle";
+static const std::string kIsAdult = "isAdult";
+static const std::string kStartYear = "startYear";
+static const std::string kEndYear = "endYear";
+static const std::string kRuntimeMinutes = "runtimeMinutes";
+static const std::string kGenres = "genres";
+
+static const size_t kSizeRatingsDump = 3;
+static const std::string kAverageRating = "averageRating";
+static const std::string kNumVotes = "numVotes";
+
+static const size_t kSizeAkasDump = 8;
+static const std::string kTitleId = "titleId";
+static const std::string kOrdering = "ordering";
+static const std::string kTitle = "title";
+static const std::string kRegion = "region";
+static const std::string kLanguage = "language";
+static const std::string kTypes = "types";
+static const std::string kAttributes = "attributes";
+static const std::string kIsOriginalTitle = "isOriginalTitle";
 
 namespace parse {
-  //  main_logic
-    void ParseTSV::parseDump(Hash* corrMovies, const std::string& path, Comparator* comp) {
-        std::ifstream data = openFile(path);
-        std::string buffer = "";
-        std::getline(data, buffer);
-        while (std::getline(data, buffer)) {
-            std::vector<std::string> words = strToVec(buffer);
-            (*comp)(corrMovies, words);
+  // comparators
+    auto comparRating = [](Hash& corrMovies, const std::vector<std::string>& words) {
+        if (corrMovies.find(words[kNumOfTitleId]) != corrMovies.end() && std::stoul(words[2]) > kNumVotesCorrVal) {
+            corrMovies[words[kNumOfTitleId]].push_back(words[kNumOfRatings]);
         }
-        data.close();
+    };
+
+
+    auto comparAkas = [](Hash& corrMovies, const std::vector<std::string>& words) {
+        if (corrMovies.find(words[kNumOfTitleId]) != corrMovies.end() && words[3] == kRuTag) {
+            corrMovies[words[kNumOfTitleId]][kNumOfPrimaryTitle] = words[kNumOfRuTitle];
+        }
+    };
+  // checks
+    auto checkBasicsComparator = [](const std::vector<std::string>& words) {
+        if (words.size() == kSizeBasicsDump
+            && words[0] == kTconst
+            && words[1] == kTitleType
+            && words[2] == kPrimaryTitle
+            && words[3] == kOriginalTitle
+            && words[4] == kIsAdult
+            && words[5] == kStartYear
+            && words[6] == kEndYear
+            && words[7] == kRuntimeMinutes
+            && words[8] == kGenres) {
+            return true;
+        }
+        return false;
+    };
+
+    auto checkRatingsComparator = [](const std::vector<std::string>& words) {
+        if (words.size() == kSizeRatingsDump
+            && words[0] == kTconst
+            && words[1] == kAverageRating
+            && words[2] == kNumVotes) {
+            return true;
+        }
+        return false;
+    };
+
+    auto checkAkasComparator = [](const std::vector<std::string>& words) {
+        if (words.size() == kSizeAkasDump
+            && words[0] == kTitleId
+            && words[1] == kOrdering
+            && words[2] == kTitle
+            && words[3] == kRegion
+            && words[4] == kLanguage
+            && words[5] == kTypes
+            && words[6] == kAttributes
+            && words[7] == kIsOriginalTitle) {
+            return true;
+        }
+        return false;
+    };
+
+  //  main_logic
+    ParseTSV::ParseTSV(iStreamPtr tsvBasics, iStreamPtr tsvRatings, iStreamPtr tsvAkas, size_t min)
+    : tsvBasics_(tsvBasics), tsvRatings_(tsvRatings), tsvAkas_(tsvAkas), numMinutes(min) {}
+
+    void ParseTSV::parseDump(Hash& corrMovies, std::istream& stream, Comparator comp) {
+        std::string buffer = "";
+        while (std::getline(stream, buffer)) {
+            auto words = strToVec(buffer);
+            comp(corrMovies, words);
+        }
     }
 
-    void ParseTSV::checkCorrect(const std::string& path, CheckComparator* comp) {
-        std::ifstream data = openFile(path);
+    void ParseTSV::checkCorrect(std::istream& stream, CheckComparator comp) {
         std::string buffer = "";
-        std::getline(data, buffer);
-        std::vector<std::string> words = strToVec(buffer);
-        if (!(*comp)(words)) {
-            throw InvalidDumpTitle(path);
+        std::getline(stream, buffer);
+        auto words = strToVec(buffer);
+        if (!comp(words)) {
+            throw InvalidDumpTitle();
         }
     }
 
@@ -33,54 +121,43 @@ namespace parse {
         std::vector<std::vector<std::string> > result;
         for (auto it : corrMovies) {
             if (it.second.size() == kSizeResultVec) {
-                std::vector<std::string> tmpVec;
-                tmpVec.clear();
-                tmpVec.push_back(it.second[2]);
-                tmpVec.push_back(it.second[9]);
+                std::vector<std::string> tmpVec = {it.second};
                 result.push_back(tmpVec);
             }
         }
         return result;
-    }
-
-    void ParseTSV::showTopCorrectMovie() {
-        try {
-            CheckBasicsComparator checkBasComp;
-            checkCorrect(filePathBasics, &checkBasComp);
-            CheckRatingsComparator checkRatingComp;
-            checkCorrect(filePathRatings, &checkRatingComp);
-            CheckAkasComparator checkAkasComp;
-            checkCorrect(filePathAkas, &checkAkasComp);
-
-            Hash corrMov;
-            ComparBasics comparatorBasic(numMinutes);
-            parseDump(&corrMov, filePathBasics, &comparatorBasic);
-            ComparRating comparatorRating;
-            parseDump(&corrMov, filePathRatings, &comparatorRating);
-            ComparAkas comparatorAkas;
-            parseDump(&corrMov, filePathAkas, &comparatorAkas);
-
-            std::vector<std::vector<std::string> > data = choiceCorrectRecord(corrMov);
-
-            std::sort(data.begin(), data.end(), [](std::vector<std::string> a, std::vector<std::string> b) {
-                                                      return std::stod(a[1]) > std::stod(b[1]);
-                                                  });
-            printTopMov(kSizeTop, data);
-        } catch (const ParseException& e) {
-            std::cerr << e.what() << std::endl;
-        } catch (const std::exception& e) {
-            std::cerr << e.what() << std::endl;
-        } catch (...) {
-            std::cerr << kUnsucEx <<  std::endl;
         }
+
+    std::vector<std::vector<std::string> > ParseTSV::getTopCorrectMovie() {
+        checkCorrect(*tsvBasics_, checkBasicsComparator);
+        checkCorrect(*tsvRatings_, checkRatingsComparator);
+        checkCorrect(*tsvAkas_, checkAkasComparator);
+
+        Hash corrMov;
+        parseDump(corrMov, *tsvBasics_, [this](Hash& corrMovies, const std::vector<std::string>& words) {
+            if (words[4] == kFlagNonAdult
+                && words[1] == kMovie
+                && words[7].find_first_not_of(kNumber) == std::string::npos
+                && std::stoul(words[7]) <= numMinutes) {
+                    corrMovies.insert(std::pair<std::string, std::vector<std::string>>(words[kNumOfTitleId], {words[kNumOfPrimaryTitleBasics]}));
+            }
+        });
+
+        parseDump(corrMov, *tsvRatings_, comparRating);
+        parseDump(corrMov, *tsvAkas_,  comparAkas);
+
+        auto data = choiceCorrectRecord(corrMov);
+
+        std::sort(data.begin(), data.end(), [](std::vector<std::string> a, std::vector<std::string> b) {
+                                                    return std::stod(a[1]) > std::stod(b[1]);
+                                                });
+        return data;
     }
-
-
 
   // supp_func
     std::ifstream openFile(const std::string& path) {
         std::ifstream data(path);
-        if (data.eof() || data.bad() || !data.is_open()) {
+        if (!data) {
             throw InvalidPath(path);
         }
         return data;
@@ -90,7 +167,7 @@ namespace parse {
         std::vector<std::string> words;
         std::stringstream streamBuffer(buffer);
         std::string tmpBuffer = "";
-        while (std::getline(streamBuffer, tmpBuffer, '\t')) {
+        while (std::getline(streamBuffer, tmpBuffer, kSeparator)) {
             words.push_back(tmpBuffer);
         }
         return words;
@@ -100,73 +177,6 @@ namespace parse {
          for (size_t i = 0; i < data.size() && i < sizeTop; ++i) {
             std::cout << data[i][0] << std::endl;
         }
-    }
-
-
-
-  //  comparators
-    void ComparRating::operator() (Hash* corrMovies, const std::vector<std::string>& words) {
-        if (corrMovies->find(words[0]) != corrMovies->end() && std::stoul(words[2]) > NumVotesCorrVal) {
-            (*corrMovies)[words[0]].push_back(words[1]);
-        }
-    }
-
-    void ComparBasics::operator() (Hash* corrMovies, const std::vector<std::string>& words) {
-        if (words[4] == FlagNonAdult
-            && words[1] == Movie
-            && words[7].find_first_not_of(Number) == std::string::npos
-            && std::stoul(words[7]) <= min) {
-                corrMovies->insert(std::pair<std::string, std::vector<std::string>>(words[0], words));
-        }
-    }
-
-    void ComparAkas::operator() (Hash* corrMovies, const std::vector<std::string>& words) {
-        if (corrMovies->find(words[0]) != corrMovies->end() && words[3] == ruTag) {
-            (*corrMovies)[words[0]][2] = words[2];
-        }
-    }
-
-
-  // checks
-    bool CheckBasicsComparator::operator() (const std::vector<std::string>& words) {
-        if (words.size() == sizeBasicsDump
-            && words[0] == tconst
-            && words[1] == titleType
-            && words[2] == primaryTitle
-            && words[3] == originalTitle
-            && words[4] == isAdult
-            && words[5] == startYear
-            && words[6] == endYear
-            && words[7] == runtimeMinutes
-            && words[8] == genres) {
-            return true;
-        }
-        return false;
-    }
-
-    bool CheckRatingsComparator::operator() (const std::vector<std::string>& words) {
-        if (words.size() == sizeRatingsDump
-            && words[0] == tconst
-            && words[1] == averageRating
-            && words[2] == numVotes) {
-            return true;
-        }
-        return false;
-    }
-
-    bool CheckAkasComparator::operator() (const std::vector<std::string>& words) {
-        if (words.size() == sizeAkasDump
-            && words[0] == titleId
-            && words[1] == ordering
-            && words[2] == title
-            && words[3] == region
-            && words[4] == language
-            && words[5] == types
-            && words[6] == attributes
-            && words[7] == isOriginalTitle) {
-            return true;
-        }
-        return false;
     }
 
 }  // namespace parse

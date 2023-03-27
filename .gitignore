@@ -4,3 +4,4 @@
 /data
 test.sh
 valgrind.log
+coverage.info

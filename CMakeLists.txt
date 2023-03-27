@@ -8,8 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
-INCLUDE_DIRECTORIES(project/include)
-ADD_EXECUTABLE(pars project/src/pars_movies.cpp project/src/main.cpp project/src/pars_input.cpp)
 
 ENABLE_TESTING()
 

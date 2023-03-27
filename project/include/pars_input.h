@@ -2,7 +2,5 @@
 
 #include "pars_movies.h"
 
-#include <getopt.h>
-#include <iostream>
 
-parse::ParseTSV* parseInput(int argc, char *argv[]);
+std::unique_ptr<parse::ParseTSV> parseInput(int argc, char *argv[]);

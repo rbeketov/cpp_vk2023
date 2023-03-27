@@ -47,8 +47,8 @@ class InvalidArgumentsNum: public ParseException {
 
 class InvalidDumpTitle: public ParseException {
  public:
-  explicit InvalidDumpTitle(const std::string& path)
-      : ParseException("Invalid dump: " + path) {}
+  InvalidDumpTitle()
+      : ParseException("Invalid dump") {}
 };
 
 }  // namespace parse

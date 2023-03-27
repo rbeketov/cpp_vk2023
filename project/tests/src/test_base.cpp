@@ -8,35 +8,36 @@ TEST(ParseBaseSuite, TestCorrectOutputFirst) {
     std::vector<std::string> paths;
 
     for (auto& entry : fs::directory_iterator(glob_test_dir / "test_correct_1")) {
+        std::cout << entry.path() << std::endl;
         paths.push_back(entry.path());
     }
-
-    ParseTSV testDump(paths[1], paths[2], paths[0], 200);
-    auto tmpCout  = std::cout.rdbuf();
-    std::stringstream receivedResult;
-    std::cout.rdbuf(receivedResult.rdbuf());
-    testDump.showTopCorrectMovie();
-    std::cout.rdbuf(tmpCout);
-    std::string expectedResult = "The Arrival of a Train\nКарменсита\nПолная кружка пива\n";
-    ASSERT_EQ(receivedResult.str(), expectedResult);
+    auto pathBas = std::make_shared<std::ifstream>(openFile(paths[1]));
+    auto pathRat = std::make_shared<std::ifstream>(openFile(paths[2]));
+    auto pathAkas = std::make_shared<std::ifstream>(openFile(paths[0]));
+    ParseTSV testDump(pathBas, pathRat, pathAkas, 200);
+    auto receivedResultVec = testDump.getTopCorrectMovie();
+    std::string receivedResult = "";
+    for (auto it : receivedResultVec) {
+        receivedResult += it[0];
+    }
+    std::string expectedResult = "The Arrival of a TrainКарменситаПолная кружка пива";
+    ASSERT_EQ(receivedResult, expectedResult);
 }
 
 
 TEST(ParseBaseSuite, TestCorrectOutputSecond) {
-    std::vector<std::string> paths;
+     std::vector<std::string> paths;
 
     for (auto& entry : fs::directory_iterator(glob_test_dir / "test_correct_2")) {
         paths.push_back(entry.path());
     }
+    auto pathBas = std::make_shared<std::ifstream>(openFile(paths[1]));
+    auto pathRat = std::make_shared<std::ifstream>(openFile(paths[2]));
+    auto pathAkas = std::make_shared<std::ifstream>(openFile(paths[0]));
+    ParseTSV testDump(pathBas, pathRat, pathAkas, 200);
+    auto receivedResultVec = testDump.getTopCorrectMovie();
 
-    ParseTSV testDump(paths[1], paths[2], paths[0], 200);
-    auto tmpCout  = std::cout.rdbuf();
-    std::stringstream receivedResult;
-    std::cout.rdbuf(receivedResult.rdbuf());
-    testDump.showTopCorrectMovie();
-    std::cout.rdbuf(tmpCout);
-    std::string expectedResult = "";
-    ASSERT_EQ(receivedResult.str(), expectedResult);
+    ASSERT_TRUE(receivedResultVec.empty());
 }
 
 
@@ -46,25 +47,10 @@ TEST(ParseBaseSuite, TestExceptFirst) {
     for (auto& entry : fs::directory_iterator(glob_test_dir / "test_except_1")) {
         paths.push_back(entry.path());
     }
+    auto pathBas = std::make_shared<std::ifstream>(openFile(paths[1]));
+    auto pathRat = std::make_shared<std::ifstream>(openFile(paths[2]));
+    auto pathAkas = std::make_shared<std::ifstream>(openFile(paths[0]));
+    ParseTSV testDump(pathBas, pathRat, pathAkas, 200);
 
-    ParseTSV testDump(paths[1], paths[2], paths[0], 200);
-    ASSERT_NO_THROW(testDump.showTopCorrectMovie());
-}
-
-
-TEST(ParseBaseSuite, TestExceptSecond) {
-    std::vector<std::string> paths;
-
-    for (auto& entry : fs::directory_iterator(glob_test_dir / "test_except_1")) {
-        paths.push_back(entry.path());
-    }
-
-    ParseTSV testDump(paths[1], paths[2], paths[0], 200);
-    auto tmpCout = std::cerr.rdbuf();
-    std::stringstream receivedResult;
-    std::cerr.rdbuf(receivedResult.rdbuf());
-    testDump.showTopCorrectMovie();
-    std::cerr.rdbuf(tmpCout);
-    std::string expectedResult = "Invalid dump: " + paths[1] + "\n";
-    ASSERT_EQ(receivedResult.str(), expectedResult);
+    ASSERT_THROW(testDump.getTopCorrectMovie(), ParseException);
 }

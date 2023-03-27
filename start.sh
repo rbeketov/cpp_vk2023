@@ -2,6 +2,6 @@
 
 set -e
 
-cd build
+cd build/project
 
-./pars --basicsDump=../data/title.basics.tsv --ratingsDump=../data/title.ratings.tsv --akasDump=../data/title.akas.tsv --numMin=60
+./pars --basicsDump=../../data/title.basics.tsv --ratingsDump=../../data/title.ratings.tsv --akasDump=../../data/title.akas.tsv --numMin=60
