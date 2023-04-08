@@ -1,7 +1,8 @@
 #include <cmath>
+#include <stdexcept>
 #include "calculator.h"
 
-#include <iostream>
+const std::string NULLPTR_IN_NODE = "Node have nullptr. Calculate impossible";
 
 namespace calculator {
 
@@ -12,8 +13,6 @@ void BinaryOperator::setLeft(ptrToICalc&& leftValue) {
 void BinaryOperator::setRight(ptrToICalc&& rightValue) {
     rightValue_ = std::move(rightValue);
 }
-
-
 
 // UnaryOperator
 void UnaryOperator::setValue(ptrToICalc&& value) {
@@ -29,38 +28,42 @@ double Expression::calculate() {
 // OperatorPlus
 double OperatorPlus::calculate() {
     if (!leftValue_.get() || !rightValue_.get()) {
-        throw std::runtime_error("Node have nullptr. Calculate impossible");
+        throw std::runtime_error(NULLPTR_IN_NODE);
     }
     return leftValue_->calculate() + rightValue_->calculate();
 }
 // OperatorMinus
 double OperatorMinus::calculate() {
     if (!leftValue_.get() || !rightValue_.get()) {
-        throw std::runtime_error("Node have nullptr. Calculate impossible");
+        throw std::runtime_error(NULLPTR_IN_NODE);
     }
     return leftValue_->calculate() - rightValue_->calculate();
 }
 // OperatorMultiply
 double OperatorMultiply::calculate() {
     if (!leftValue_.get() || !rightValue_.get()) {
-        throw std::runtime_error("Node have nullptr. Calculate impossible");
+        throw std::runtime_error(NULLPTR_IN_NODE);
     }
     return leftValue_->calculate() * rightValue_->calculate();
 }
 // OperatorAsin
 double OperatorAsin::calculate() {
     if (!value_.get()) {
-        throw std::runtime_error("Node have nullptr. Calculate impossible");
+        throw std::runtime_error(NULLPTR_IN_NODE);
+    }
+    if (std::abs(value_->calculate()) > 1) {
+        throw std::runtime_error("The scope of the function \"arcsin(x)\" definition is violated");
     }
     return asin(value_->calculate());
 }
 // OperatorAcos
 double OperatorAcos::calculate() {
-    std::cout << "зашёл1" << std::endl;
     if (!value_.get()) {
-        throw std::runtime_error("Node have nullptr. Calculate impossible");
+        throw std::runtime_error(NULLPTR_IN_NODE);
     }
-    std::cout << "зашёл2" << std::endl;
+    if (std::abs(value_->calculate()) > 1) {
+        throw std::runtime_error("The scope of the function \"arccos(x)\" definition is violated");
+    }
     return acos(value_->calculate());
 }
 

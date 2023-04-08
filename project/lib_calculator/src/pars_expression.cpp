@@ -7,6 +7,7 @@
 #include <numeric>
 #include <cstring>
 #include <stack>
+#include <cctype>
 
 const std::string ASIN_TOKEN = "asin";
 const std::string ACOS_TOKEN = "acos"; 
@@ -16,8 +17,6 @@ const std::string CLOSE_BRACKET_TOKEN = ")";
 const std::string MULTIPLY_TOKEN = "*";
 const std::string MINUS_TOKEN = "-";
 const std::string PLUS_TOKEN = "+";
-const std::string ZERO_NUMBER_TOKEN = "0";
-const std::string NINE_NUMBER_TOKEN = "9";
 const size_t SIZE_TOKEN_TRIGFUNC = 4;
 const size_t FIRST_PRIORITY = 1;
 const size_t SECOND_PRIORITY = 2;
@@ -56,7 +55,7 @@ auto checkSimpleToken = [](const char* value) {
            std::string(value, SIZE_SIMPLE_TOKEN) == POINT_TOKEN ||
            std::string(value, SIZE_SIMPLE_TOKEN) == OPEN_BRACKET_TOKEN ||
            std::string(value, SIZE_SIMPLE_TOKEN) == CLOSE_BRACKET_TOKEN ||
-           (ZERO_NUMBER_TOKEN <= std::string(value, SIZE_SIMPLE_TOKEN) && std::string(value, SIZE_SIMPLE_TOKEN) <= NINE_NUMBER_TOKEN);
+           std::isdigit(*value);
 };
 
 auto checkCompositeToken = [](stringIter& iterCurr, stringIter& iterEnd, std::vector<std::string>& tokens) {
@@ -112,7 +111,6 @@ size_t findTokenLowestPriority(std::vector<std::string>& tokens) {
     std::stack<std::string> foundBracket;
     size_t resultPos = CODE_ERROR_IN_FOUNDPOS;
     for (size_t i = 0; i < tokens.size(); ++i) {
-        // std::cout << "IN LOWEST PR " << tokens[i] << std::endl; 
         if (tokens[i] == OPEN_BRACKET_TOKEN) {
             foundBracket.push(tokens[i]);
             continue;
@@ -122,12 +120,11 @@ size_t findTokenLowestPriority(std::vector<std::string>& tokens) {
             continue;
         }
         if (foundBracket.empty() && (tokens[i] == MULTIPLY_TOKEN ||
-                              tokens[i] == MINUS_TOKEN || 
+                              (tokens[i] == MINUS_TOKEN && i != 0 && std::isdigit(*tokens[i-1].c_str())) || 
                               tokens[i] == PLUS_TOKEN ||
                               tokens[i] == ASIN_TOKEN ||
                               tokens[i] == ACOS_TOKEN) && Priority[tokens[i]] >= lowestPriority) {
             resultPos = i;
-            //std::cout << "IN LOWEST PR " << tokens[i] << std::endl; 
             lowestPriority = Priority[tokens[i]];
         }
     }
@@ -148,7 +145,7 @@ calculator::ptrToBinary createCalcNodeBinary(std::string& token) {
     if (token == PLUS_TOKEN) {
         return std::make_unique<calculator::OperatorPlus>(calculator::OperatorPlus());
     }
-    return std::make_unique<calculator::OperatorMultiply>(calculator::OperatorMultiply());
+    return (std::make_unique<calculator::OperatorMultiply>(calculator::OperatorMultiply()));
 }
 
 
@@ -168,16 +165,12 @@ calculator::ptrToICalc parseTokensToCalc(std::vector<std::string>& tokens) {
 
     if (currPos == CODE_ERROR_IN_FOUNDPOS) {
         std::string resultExpression = std::accumulate(tokens.begin() + 1, tokens.end(), *tokens.begin());
-        //std::cout << resultExpression << std::endl;
         auto result = std::make_unique<calculator::Expression>(calculator::Expression(resultExpression));
         return result;
     }
-
-    //std::cout << tokens[currPos] << std::endl;
-
     
     if (tokens[currPos] == ASIN_TOKEN || tokens[currPos] == ACOS_TOKEN) {
-        auto result = createCalcNodeUnary(tokens[currPos]);
+        auto result = std::move(createCalcNodeUnary(tokens[currPos]));
 
         std::vector<std::string> stepTokens{tokens.begin()+currPos + 1, tokens.end()};
         result->setValue(parseTokensToCalc(stepTokens));
@@ -185,7 +178,7 @@ calculator::ptrToICalc parseTokensToCalc(std::vector<std::string>& tokens) {
     }
 
 
-    auto result = createCalcNodeBinary(tokens[currPos]);
+    auto result = std::move(createCalcNodeBinary(tokens[currPos]));
 
     std::vector<std::string> stepTokensLeft{tokens.begin(), tokens.begin() + currPos};
     result->setLeft(parseTokensToCalc(stepTokensLeft));
@@ -193,8 +186,6 @@ calculator::ptrToICalc parseTokensToCalc(std::vector<std::string>& tokens) {
     result->setRight(parseTokensToCalc(stepTokensRight));
     return result;
 }
-
-
 
 
 

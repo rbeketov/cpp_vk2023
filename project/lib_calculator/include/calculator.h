@@ -21,18 +21,16 @@ class ICalculatable {
 
 class UnaryOperator: public ICalculatable {
  public:
-  virtual ~UnaryOperator() {};
-  virtual void setValue(ptrToICalc&& value);
- private:
+   void setValue(ptrToICalc&& value);
+ protected:
    ptrToICalc value_;
 };
 
 class BinaryOperator: public ICalculatable {
  public:
-  virtual ~BinaryOperator() {};
-  virtual void setLeft(ptrToICalc&& leftValue);
-  virtual void setRight(ptrToICalc&& rightValue);
- private:
+  void setLeft(ptrToICalc&& leftValue);
+  void setRight(ptrToICalc&& rightValue);
+ protected:
   ptrToICalc leftValue_;
   ptrToICalc rightValue_;
 };
@@ -49,50 +47,37 @@ class Expression: public ICalculatable {
 
 class OperatorPlus: public BinaryOperator {
  public:
-  using BinaryOperator::setLeft;
-  using BinaryOperator::setRight;
+  // using BinaryOperator::setLeft;
+  // using BinaryOperator::setRight;
   double calculate() override;
- private:
-  ptrToICalc leftValue_;
-  ptrToICalc rightValue_;
 };
 
 class OperatorMinus: public BinaryOperator {
  public:
-  using BinaryOperator::setLeft;
-  using BinaryOperator::setRight;
+  // using BinaryOperator::setLeft;
+  // using BinaryOperator::setRight;
   double calculate() override;
- private:
-  ptrToICalc leftValue_;
-  ptrToICalc rightValue_;
 };
 
 class OperatorMultiply: public BinaryOperator {
  public:
-  using BinaryOperator::setLeft;
-  using BinaryOperator::setRight;
+  // using BinaryOperator::setLeft;
+  // using BinaryOperator::setRight;
   double calculate() override;
- private:
-  ptrToICalc leftValue_;
-  ptrToICalc rightValue_;
 };
 
 
 class OperatorAsin: public UnaryOperator {
  public:
-  using UnaryOperator::setValue;
+  // using UnaryOperator::setValue;
   double calculate() override;
- private:
-  ptrToICalc value_;
 };
 
 
 class OperatorAcos: public UnaryOperator {
  public:
-  using UnaryOperator::setValue;
+  // using UnaryOperator::setValue;
   double calculate() override;
- private:
-  ptrToICalc value_;
 };
 
 }  // namespace calculator
