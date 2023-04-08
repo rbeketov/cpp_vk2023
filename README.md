@@ -21,7 +21,7 @@
 </pre>
 
 <div><strong>Мой вариант:</strong></div>
-<div>Добавьте к вашей реализации операции *, asin, acos (есть в <cmath>)</div>
+<div>Добавьте к вашей реализации операции *, asin, acos (есть в < cmath >)</div>
 
 <strong>Руководство: </strong>
 <pre> 
