@@ -14,11 +14,11 @@ void BinaryOperator::setRight(ptrToICalc&& rightValue) {
 }
 
 
+
 // UnaryOperator
 void UnaryOperator::setValue(ptrToICalc&& value) {
     value_ = std::move(value);
 }
-
 
 // Expression
 Expression::Expression(std::string& value) : value_(std::stod(value)) {}
@@ -54,11 +54,13 @@ double OperatorAsin::calculate() {
     }
     return asin(value_->calculate());
 }
-//// OperatorAcos
+// OperatorAcos
 double OperatorAcos::calculate() {
+    std::cout << "зашёл1" << std::endl;
     if (!value_.get()) {
         throw std::runtime_error("Node have nullptr. Calculate impossible");
     }
+    std::cout << "зашёл2" << std::endl;
     return acos(value_->calculate());
 }
 

@@ -6,39 +6,32 @@
 namespace calculator {
 
 class ICalculatable;
+class UnaryOperator;
+class BinaryOperator;
 
 using ptrToICalc = std::unique_ptr<ICalculatable>;
+using ptrToBinary = std::unique_ptr<BinaryOperator>;
+using ptrToUnary = std::unique_ptr<UnaryOperator>;
 
 class ICalculatable {
  public:
   virtual ~ICalculatable() {};
   virtual double calculate() = 0;
-   // setters
-  virtual void setValue(ptrToICalc&& value) = 0;
-  virtual void setLeft(ptrToICalc&& leftValue) = 0;
-  virtual void setRight(ptrToICalc&& rightValue) = 0;
-
 };
 
 class UnaryOperator: public ICalculatable {
  public:
-  void setValue(ptrToICalc&& value) override;
-  // virtual double calculate() = 0;
-  void setLeft(ptrToICalc&& leftValue) override  {leftValue.get(); throw;}
-  void setRight(ptrToICalc&& rightValue) override {rightValue.get(); throw;}
-
+  virtual ~UnaryOperator() {};
+  virtual void setValue(ptrToICalc&& value);
  private:
    ptrToICalc value_;
 };
 
 class BinaryOperator: public ICalculatable {
  public:
-  void setLeft(ptrToICalc&& leftValue) override;
-  void setRight(ptrToICalc&& rightValue) override;
-  // virtual double calculate() = 0;
-
-  void setValue(ptrToICalc&& value) override {value.get(); throw;}
-
+  virtual ~BinaryOperator() {};
+  virtual void setLeft(ptrToICalc&& leftValue);
+  virtual void setRight(ptrToICalc&& rightValue);
  private:
   ptrToICalc leftValue_;
   ptrToICalc rightValue_;
@@ -50,18 +43,14 @@ class Expression: public ICalculatable {
   Expression();
   explicit Expression(std::string& value);
   double calculate() override;
-  
-
-  void setValue(ptrToICalc&& value) override { value.get();  throw;}
-  void setLeft(ptrToICalc&& leftValue) override  {leftValue.get(); throw;}
-  void setRight(ptrToICalc&& rightValue) override { rightValue.get(); throw;}
-
  private:
   double value_;
 };
 
 class OperatorPlus: public BinaryOperator {
  public:
+  using BinaryOperator::setLeft;
+  using BinaryOperator::setRight;
   double calculate() override;
  private:
   ptrToICalc leftValue_;
@@ -70,6 +59,8 @@ class OperatorPlus: public BinaryOperator {
 
 class OperatorMinus: public BinaryOperator {
  public:
+  using BinaryOperator::setLeft;
+  using BinaryOperator::setRight;
   double calculate() override;
  private:
   ptrToICalc leftValue_;
@@ -78,6 +69,8 @@ class OperatorMinus: public BinaryOperator {
 
 class OperatorMultiply: public BinaryOperator {
  public:
+  using BinaryOperator::setLeft;
+  using BinaryOperator::setRight;
   double calculate() override;
  private:
   ptrToICalc leftValue_;
@@ -87,17 +80,19 @@ class OperatorMultiply: public BinaryOperator {
 
 class OperatorAsin: public UnaryOperator {
  public:
-   double calculate() override;
+  using UnaryOperator::setValue;
+  double calculate() override;
  private:
-   ptrToICalc value_;
+  ptrToICalc value_;
 };
 
 
 class OperatorAcos: public UnaryOperator {
  public:
-   double calculate() override;
+  using UnaryOperator::setValue;
+  double calculate() override;
  private:
-   ptrToICalc value_;
+  ptrToICalc value_;
 };
 
 }  // namespace calculator

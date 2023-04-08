@@ -134,25 +134,22 @@ size_t findTokenLowestPriority(std::vector<std::string>& tokens) {
     return resultPos;
 }
 
-calculator::ptrToICalc createCalcNode(std::string& token) {
+calculator::ptrToUnary createCalcNodeUnary(std::string& token) {
+    if (token == ASIN_TOKEN) {
+        return std::make_unique<calculator::OperatorAsin>(calculator::OperatorAsin());
+    }
+    return std::make_unique<calculator::OperatorAcos>(calculator::OperatorAcos());
+}
+
+calculator::ptrToBinary createCalcNodeBinary(std::string& token) {
     if (token == MINUS_TOKEN) {
         return std::make_unique<calculator::OperatorMinus>(calculator::OperatorMinus());
     }
     if (token == PLUS_TOKEN) {
         return std::make_unique<calculator::OperatorPlus>(calculator::OperatorPlus());
     }
-    if (token == ASIN_TOKEN) {
-        return std::make_unique<calculator::OperatorAsin>(calculator::OperatorAsin());
-    }
-    if (token == ACOS_TOKEN) {
-        return std::make_unique<calculator::OperatorAcos>(calculator::OperatorAcos());
-    }
-    if (token == MULTIPLY_TOKEN) {
-        return std::make_unique<calculator::OperatorMultiply>(calculator::OperatorMultiply());
-    }
-    return std::make_unique<calculator::Expression>(calculator::Expression(token));
+    return std::make_unique<calculator::OperatorMultiply>(calculator::OperatorMultiply());
 }
-
 
 
 calculator::ptrToICalc parseTokensToCalc(std::vector<std::string>& tokens) {
@@ -171,23 +168,29 @@ calculator::ptrToICalc parseTokensToCalc(std::vector<std::string>& tokens) {
 
     if (currPos == CODE_ERROR_IN_FOUNDPOS) {
         std::string resultExpression = std::accumulate(tokens.begin() + 1, tokens.end(), *tokens.begin());
-        // std::cout << resultExpression << std::endl;
-        auto result = createCalcNode(resultExpression);
+        //std::cout << resultExpression << std::endl;
+        auto result = std::make_unique<calculator::Expression>(calculator::Expression(resultExpression));
         return result;
     }
 
     //std::cout << tokens[currPos] << std::endl;
 
-    auto result = createCalcNode(tokens[currPos]);
+    
     if (tokens[currPos] == ASIN_TOKEN || tokens[currPos] == ACOS_TOKEN) {
+        auto result = createCalcNodeUnary(tokens[currPos]);
+
         std::vector<std::string> stepTokens{tokens.begin()+currPos + 1, tokens.end()};
         result->setValue(parseTokensToCalc(stepTokens));
-    } else {
-        std::vector<std::string> stepTokensLeft{tokens.begin(), tokens.begin() + currPos};
-        result->setLeft(parseTokensToCalc(stepTokensLeft));
-        std::vector<std::string> stepTokensRight{tokens.begin() + currPos + 1, tokens.end()};
-        result->setRight(parseTokensToCalc(stepTokensRight));
+        return result;
     }
+
+
+    auto result = createCalcNodeBinary(tokens[currPos]);
+
+    std::vector<std::string> stepTokensLeft{tokens.begin(), tokens.begin() + currPos};
+    result->setLeft(parseTokensToCalc(stepTokensLeft));
+    std::vector<std::string> stepTokensRight{tokens.begin() + currPos + 1, tokens.end()};
+    result->setRight(parseTokensToCalc(stepTokensRight));
     return result;
 }
 

@@ -2,4 +2,4 @@
 
 cd build/project
 
-./calculator '10+10'
+./calculator 'acos(10)'
