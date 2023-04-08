@@ -2,4 +2,4 @@
 
 cd build/project
 
-./calculator '7.129+(acos(-1)+asin(-1)+18-18-(-9)+17*(-2.1))'
+./calculator '(5+7)-2*2-asin(-1)-(-2)'

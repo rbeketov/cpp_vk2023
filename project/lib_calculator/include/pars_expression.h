@@ -6,11 +6,10 @@
 
 using stringIter = std::string::const_iterator;
 
-
+// main function
 calculator::ptrToICalc parsePassedExpressionToCalc(const char* buffer);
 
-bool checkValidBracket(std::vector<std::string>& tokens);
-bool intoBracketsNotNull(std::vector<std::string>& tokens);
+//
 
 size_t findTokenLowestPriority(std::vector<std::string>& tokens);
 std::vector<std::string> stringSplitToToken(const std::string& expression);

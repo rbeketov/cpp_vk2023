@@ -1,5 +1,5 @@
 #include "pars_expression.h"
-
+#include "exception.h"
 
 #include <exception>
 #include <iostream>
@@ -22,8 +22,6 @@ const size_t FIRST_PRIORITY = 1;
 const size_t SECOND_PRIORITY = 2;
 const size_t THIRD_PRIORITY = 3;
 const size_t SIZE_SIMPLE_TOKEN = 1;
-const std::string INVALID_EXPRESSION = "Invalid expression";
-const std::string INVALID_TOKEN = "Invalid token";
 const size_t CODE_ERROR_IN_FOUNDPOS = -1;
 
 
@@ -33,22 +31,58 @@ std::unordered_map<std::string, size_t> Priority{{ASIN_TOKEN, FIRST_PRIORITY},
                                                  {PLUS_TOKEN, THIRD_PRIORITY},
                                                  {MINUS_TOKEN, THIRD_PRIORITY}};
 
+auto checkValidBracketsSequence = [](std::vector<std::string>& tokens) {
+    int counterBracket = 0;
+    for (auto it : tokens) {
+        if (it == OPEN_BRACKET_TOKEN) {
+            counterBracket++;
+        } else if (it == CLOSE_BRACKET_TOKEN) {
+            counterBracket--;
+        }
+        if (counterBracket < 0) {
+            return false;
+        }
+    }
+    return !counterBracket;
+};
+
+auto checkValidLocationBrackets = [](std::vector<std::string>& tokens) {
+    for (size_t i = 0; i < tokens.size() - 1; ++i) {
+        if ((tokens[i] == CLOSE_BRACKET_TOKEN && 
+            tokens[i+1] != MULTIPLY_TOKEN &&
+            tokens[i+1] != MINUS_TOKEN && 
+            tokens[i+1] != PLUS_TOKEN &&
+            tokens[i+1] != CLOSE_BRACKET_TOKEN) || 
+            (tokens[i] == OPEN_BRACKET_TOKEN &&
+            tokens[i+1] != OPEN_BRACKET_TOKEN &&
+            !std::isdigit(*tokens[i+1].c_str()) &&
+            tokens[i+1] != ASIN_TOKEN &&
+            tokens[i+1] != ACOS_TOKEN &&
+            tokens[i+1] != MINUS_TOKEN)) {
+            return false;
+        }
+    }
+    return true;
+};
 
 calculator::ptrToICalc parsePassedExpressionToCalc(const char* buffer) {
-    std::string expression(buffer);
-
-    auto tokens = stringSplitToToken(expression);
-
-    if (!checkValidBracket(tokens)) {
-        throw std::runtime_error(INVALID_EXPRESSION);
+    if (!buffer) {
+        throw calculator::InvalidExpression();
     }
-
+    std::string expression(buffer);
+    auto tokens = stringSplitToToken(expression);
+    if (tokens.empty() || !checkValidBracketsSequence(tokens) || !checkValidLocationBrackets(tokens)) {
+        throw calculator::InvalidExpression();
+    }
     auto result = parseTokensToCalc(tokens);
     return result;
 }
 
 
 auto checkSimpleToken = [](const char* value) {
+    if (!value) {
+        throw calculator::InvalidExpression();
+    }
     return std::string(value, SIZE_SIMPLE_TOKEN) == MULTIPLY_TOKEN ||
            std::string(value, SIZE_SIMPLE_TOKEN) == PLUS_TOKEN ||
            std::string(value, SIZE_SIMPLE_TOKEN) == MINUS_TOKEN ||
@@ -78,32 +112,13 @@ std::vector<std::string> stringSplitToToken(const std::string& expression) {
     while(it != iterEndOfExpression) {
         if (!checkSimpleToken(&(*it))) {
             if (!checkCompositeToken(it, iterEndOfExpression, tokens)) {
-                throw std::runtime_error(INVALID_TOKEN);
+                throw calculator::InvalidToken({*it});
             }
         }
         tokens.push_back({*it});
         it++;
     }
     return tokens;
-}
-
-
-bool checkValidBracket(std::vector<std::string>& tokens) {
-    int counterBracket = 0;
-    for (auto it : tokens) {
-        if (it == OPEN_BRACKET_TOKEN) {
-            counterBracket++;
-        } else if (it == CLOSE_BRACKET_TOKEN) {
-            counterBracket--;
-        }
-        if (counterBracket < 0) {
-            return false;
-        }
-    }
-    if (counterBracket) {
-        return false;
-    }
-    return true;
 }
 
 size_t findTokenLowestPriority(std::vector<std::string>& tokens) {
@@ -120,7 +135,7 @@ size_t findTokenLowestPriority(std::vector<std::string>& tokens) {
             continue;
         }
         if (foundBracket.empty() && (tokens[i] == MULTIPLY_TOKEN ||
-                              (tokens[i] == MINUS_TOKEN && i != 0 && std::isdigit(*tokens[i-1].c_str())) || 
+                              (tokens[i] == MINUS_TOKEN && i != 0 && tokens[i-1] != OPEN_BRACKET_TOKEN) || 
                               tokens[i] == PLUS_TOKEN ||
                               tokens[i] == ASIN_TOKEN ||
                               tokens[i] == ACOS_TOKEN) && Priority[tokens[i]] >= lowestPriority) {
@@ -150,6 +165,9 @@ calculator::ptrToBinary createCalcNodeBinary(std::string& token) {
 
 
 calculator::ptrToICalc parseTokensToCalc(std::vector<std::string>& tokens) {
+    if (!tokens.size()) {
+        throw calculator::InvalidExpression();
+    }
     size_t currPos = findTokenLowestPriority(tokens);
     if (currPos == CODE_ERROR_IN_FOUNDPOS) {
         if (*tokens.begin() == OPEN_BRACKET_TOKEN && *(tokens.end()-1) == CLOSE_BRACKET_TOKEN) {
@@ -160,52 +178,23 @@ calculator::ptrToICalc parseTokensToCalc(std::vector<std::string>& tokens) {
         } else if (*(tokens.end()-1) == CLOSE_BRACKET_TOKEN) {
             tokens.erase(tokens.end()-1);
         }
-        currPos = findTokenLowestPriority(tokens);  
+        currPos = findTokenLowestPriority(tokens);
     }
-
     if (currPos == CODE_ERROR_IN_FOUNDPOS) {
         std::string resultExpression = std::accumulate(tokens.begin() + 1, tokens.end(), *tokens.begin());
         auto result = std::make_unique<calculator::Expression>(calculator::Expression(resultExpression));
         return result;
     }
-    
     if (tokens[currPos] == ASIN_TOKEN || tokens[currPos] == ACOS_TOKEN) {
-        auto result = std::move(createCalcNodeUnary(tokens[currPos]));
-
+        auto result = createCalcNodeUnary(tokens[currPos]);
         std::vector<std::string> stepTokens{tokens.begin()+currPos + 1, tokens.end()};
         result->setValue(parseTokensToCalc(stepTokens));
         return result;
     }
-
-
-    auto result = std::move(createCalcNodeBinary(tokens[currPos]));
-
+    auto result = createCalcNodeBinary(tokens[currPos]);
     std::vector<std::string> stepTokensLeft{tokens.begin(), tokens.begin() + currPos};
     result->setLeft(parseTokensToCalc(stepTokensLeft));
     std::vector<std::string> stepTokensRight{tokens.begin() + currPos + 1, tokens.end()};
     result->setRight(parseTokensToCalc(stepTokensRight));
     return result;
 }
-
-
-
-// bool intoBracketsNotNull(std::vector<std::string>& tokens) {
-//     int counterExpressions = 0;
-//     for (auto it : tokens) {
-//         if (*it.c_str() == OPEN_BRACKET_TOKEN) {
-//             counterExpressions++;
-//         } else if (counterExpressions != 0 && 
-//                    ZERO_NUMBER_TOKEN <= *it.c_str() && *it.c_str() <= NINE_NUMBER_TOKEN) {
-//             counterExpressions--;
-//         } else if (*it.c_str() == CLOSE_BRACKET_TOKEN) {
-
-//         }
-//     }
-//     if (counterExpressions) {
-//         return false;
-//     }
-//     return true;
-// } // (1)
-
-
-

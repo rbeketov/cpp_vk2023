@@ -38,7 +38,6 @@ class BinaryOperator: public ICalculatable {
 
 class Expression: public ICalculatable {
  public:
-  Expression();
   explicit Expression(std::string& value);
   double calculate() override;
  private:
@@ -47,36 +46,26 @@ class Expression: public ICalculatable {
 
 class OperatorPlus: public BinaryOperator {
  public:
-  // using BinaryOperator::setLeft;
-  // using BinaryOperator::setRight;
   double calculate() override;
 };
 
 class OperatorMinus: public BinaryOperator {
  public:
-  // using BinaryOperator::setLeft;
-  // using BinaryOperator::setRight;
   double calculate() override;
 };
 
 class OperatorMultiply: public BinaryOperator {
  public:
-  // using BinaryOperator::setLeft;
-  // using BinaryOperator::setRight;
   double calculate() override;
 };
-
 
 class OperatorAsin: public UnaryOperator {
  public:
-  // using UnaryOperator::setValue;
   double calculate() override;
 };
 
-
 class OperatorAcos: public UnaryOperator {
  public:
-  // using UnaryOperator::setValue;
   double calculate() override;
 };
 
