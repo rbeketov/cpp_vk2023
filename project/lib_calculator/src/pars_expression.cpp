@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <numeric>
 #include <cstring>
+#include <stack>
 
 const std::string ASIN_TOKEN = "asin";
 const std::string ACOS_TOKEN = "acos"; 
@@ -24,6 +25,7 @@ const size_t THIRD_PRIORITY = 3;
 const size_t SIZE_SIMPLE_TOKEN = 1;
 const std::string INVALID_EXPRESSION = "Invalid expression";
 const std::string INVALID_TOKEN = "Invalid token";
+const size_t CODE_ERROR_IN_FOUNDPOS = -1;
 
 
 std::unordered_map<std::string, size_t> Priority{{ASIN_TOKEN, FIRST_PRIORITY},
@@ -107,23 +109,25 @@ bool checkValidBracket(std::vector<std::string>& tokens) {
 
 size_t findTokenLowestPriority(std::vector<std::string>& tokens) {
     size_t lowestPriority = FIRST_PRIORITY;
-    bool foundBracket = false;
-    size_t resultPos = 0;
+    std::stack<std::string> foundBracket;
+    size_t resultPos = CODE_ERROR_IN_FOUNDPOS;
     for (size_t i = 0; i < tokens.size(); ++i) {
+        // std::cout << "IN LOWEST PR " << tokens[i] << std::endl; 
         if (tokens[i] == OPEN_BRACKET_TOKEN) {
-            foundBracket = true;
+            foundBracket.push(tokens[i]);
             continue;
         }
         if (tokens[i] == CLOSE_BRACKET_TOKEN) {
-            foundBracket = false;
+            foundBracket.pop();
             continue;
         }
-        if (!foundBracket && (tokens[i] == MULTIPLY_TOKEN ||
+        if (foundBracket.empty() && (tokens[i] == MULTIPLY_TOKEN ||
                               tokens[i] == MINUS_TOKEN || 
                               tokens[i] == PLUS_TOKEN ||
                               tokens[i] == ASIN_TOKEN ||
                               tokens[i] == ACOS_TOKEN) && Priority[tokens[i]] >= lowestPriority) {
             resultPos = i;
+            //std::cout << "IN LOWEST PR " << tokens[i] << std::endl; 
             lowestPriority = Priority[tokens[i]];
         }
     }
@@ -153,26 +157,33 @@ calculator::ptrToICalc createCalcNode(std::string& token) {
 
 calculator::ptrToICalc parseTokensToCalc(std::vector<std::string>& tokens) {
     size_t currPos = findTokenLowestPriority(tokens);
-    if (!currPos && *tokens.begin() == OPEN_BRACKET_TOKEN) {
-        tokens.erase(tokens.begin());
-        tokens.erase(tokens.end());
-        if (!checkValidBracket(tokens)) {
-            throw std::runtime_error(INVALID_EXPRESSION);
+    if (currPos == CODE_ERROR_IN_FOUNDPOS) {
+        if (*tokens.begin() == OPEN_BRACKET_TOKEN && *(tokens.end()-1) == CLOSE_BRACKET_TOKEN) {
+            tokens.erase(tokens.begin());
+            tokens.erase(tokens.end()-1);
+        } else if (*tokens.begin() == OPEN_BRACKET_TOKEN) {
+            tokens.erase(tokens.begin());
+        } else if (*(tokens.end()-1) == CLOSE_BRACKET_TOKEN) {
+            tokens.erase(tokens.end()-1);
         }
-        currPos = findTokenLowestPriority(tokens);
+        currPos = findTokenLowestPriority(tokens);  
     }
 
-    if (!currPos) {
+    if (currPos == CODE_ERROR_IN_FOUNDPOS) {
         std::string resultExpression = std::accumulate(tokens.begin() + 1, tokens.end(), *tokens.begin());
+        // std::cout << resultExpression << std::endl;
         auto result = createCalcNode(resultExpression);
         return result;
     }
+
+    //std::cout << tokens[currPos] << std::endl;
+
     auto result = createCalcNode(tokens[currPos]);
     if (tokens[currPos] == ASIN_TOKEN || tokens[currPos] == ACOS_TOKEN) {
         std::vector<std::string> stepTokens{tokens.begin()+currPos + 1, tokens.end()};
         result->setValue(parseTokensToCalc(stepTokens));
     } else {
-        std::vector<std::string> stepTokensLeft{tokens.begin(), tokens.begin() + currPos - 1};
+        std::vector<std::string> stepTokensLeft{tokens.begin(), tokens.begin() + currPos};
         result->setLeft(parseTokensToCalc(stepTokensLeft));
         std::vector<std::string> stepTokensRight{tokens.begin() + currPos + 1, tokens.end()};
         result->setRight(parseTokensToCalc(stepTokensRight));

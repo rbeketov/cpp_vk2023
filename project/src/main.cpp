@@ -1,5 +1,4 @@
 #include <iostream>
-
 #include "pars_expression.h"
 
 const int kSizeOfPassedExpression = 2;

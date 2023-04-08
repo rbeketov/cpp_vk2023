@@ -1,7 +1,7 @@
 #include <cmath>
 #include "calculator.h"
 
-
+#include <iostream>
 
 namespace calculator {
 
@@ -22,31 +22,43 @@ void UnaryOperator::setValue(ptrToICalc&& value) {
 
 // Expression
 Expression::Expression(std::string& value) : value_(std::stod(value)) {}
-void Expression::setValue(std::string& value) {
-    value_ = std::stod(value);
-}
 double Expression::calculate() {
     return value_;
 }
 
 // OperatorPlus
 double OperatorPlus::calculate() {
+    if (!leftValue_.get() || !rightValue_.get()) {
+        throw std::runtime_error("Node have nullptr. Calculate impossible");
+    }
     return leftValue_->calculate() + rightValue_->calculate();
 }
 // OperatorMinus
 double OperatorMinus::calculate() {
+    if (!leftValue_.get() || !rightValue_.get()) {
+        throw std::runtime_error("Node have nullptr. Calculate impossible");
+    }
     return leftValue_->calculate() - rightValue_->calculate();
 }
 // OperatorMultiply
 double OperatorMultiply::calculate() {
+    if (!leftValue_.get() || !rightValue_.get()) {
+        throw std::runtime_error("Node have nullptr. Calculate impossible");
+    }
     return leftValue_->calculate() * rightValue_->calculate();
 }
 // OperatorAsin
 double OperatorAsin::calculate() {
+    if (!value_.get()) {
+        throw std::runtime_error("Node have nullptr. Calculate impossible");
+    }
     return asin(value_->calculate());
 }
 //// OperatorAcos
 double OperatorAcos::calculate() {
+    if (!value_.get()) {
+        throw std::runtime_error("Node have nullptr. Calculate impossible");
+    }
     return acos(value_->calculate());
 }
 
