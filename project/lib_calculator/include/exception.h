@@ -1,21 +1,14 @@
 #pragma once // NOLINT
 
-#include <exception>
+#include <stdexcept>
 #include <string>
 
 namespace calculator {
 
-class CalculatorException: public std::exception {
+class CalculatorException: public std::runtime_error {
  public:
   explicit CalculatorException(const std::string& msg)
-      : m_msg(msg) {}
-
-  const char* what() const noexcept override {
-    return m_msg.c_str();
-  }
-
- private:
-  std::string m_msg;
+      : std::runtime_error(msg) {}
 };
 
 class InvalidMathFuncScope: public CalculatorException {
