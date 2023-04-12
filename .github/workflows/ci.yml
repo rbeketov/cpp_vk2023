@@ -21,7 +21,7 @@ jobs:
     container: rbeketov/ubuntu_cpp
     needs: [test]
     steps:
-      - uses: rbeketov/ubuntu_cpp
+      - uses: actions/checkout@v2
       - run: make memtest
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
