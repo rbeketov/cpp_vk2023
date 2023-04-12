@@ -2,4 +2,4 @@
 
 cd build/project
 
-./calculator '(4343)'
+./calculator '23+7-(10+12)'

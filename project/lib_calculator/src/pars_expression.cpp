@@ -65,6 +65,11 @@ auto checkValidLocationBrackets = [](std::vector<std::string>& tokens) {
     return true;
 };
 
+
+auto checkCorrectDots = [] (const std::string& value) {
+    return value.find_first_of(POINT_TOKEN) == value.find_last_of(POINT_TOKEN);
+};
+
 calculator::ptrToICalc parsePassedExpressionToCalc(const char* buffer) {
     if (!buffer) {
         throw calculator::InvalidExpression();
@@ -182,6 +187,9 @@ calculator::ptrToICalc parseTokensToCalc(std::vector<std::string>& tokens) {
     }
     if (currPos == CODE_ERROR_IN_FOUNDPOS) {
         std::string resultExpression = std::accumulate(tokens.begin() + 1, tokens.end(), *tokens.begin());
+        if (!checkCorrectDots(resultExpression)) {
+            throw calculator::InvalidExpression();
+        }
         auto result = std::make_unique<calculator::Expression>(calculator::Expression(resultExpression));
         return result;
     }

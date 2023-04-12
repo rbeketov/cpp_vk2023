@@ -34,8 +34,6 @@
              или
              $ make clean
              $ make build
-      Запуск линтеров:
-             $ make check
       Запуск тестов: 
              $ make test
              $ make memtest

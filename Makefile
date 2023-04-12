@@ -6,17 +6,14 @@ clean:
 	rm -rf build
 
 build:
-	./build.sh
+	sh build.sh
 
 rebuild: clean build
 
-check:
-	./run_linters.sh
-
 test:
-	./build.sh -DWITH_MEMCHECK=OFF
-	./run_tests.sh
+	sh build.sh -DWITH_MEMCHECK=OFF
+	sh run_tests.sh
 
 memtest:
-	./build.sh -DWITH_MEMCHECK=ON
-	./run_tests.sh --memcheck
+	sh build.sh -DWITH_MEMCHECK=ON
+	sh run_tests.sh --memcheck

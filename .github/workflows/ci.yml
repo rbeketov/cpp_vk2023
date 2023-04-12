@@ -1,0 +1,29 @@
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: rbeketov/ubuntu_cpp
+    steps:
+    - uses: actions/checkout@v2 
+    - run: make build
+
+  test:
+    runs-on: ubuntu-latest
+    container: rbeketov/ubuntu_cpp
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v2
+      - run: make test
+
+  memtest:
+    runs-on: ubuntu-latest
+    container: rbeketov/ubuntu_cpp
+    needs: [test]
+    steps:
+      - uses: rbeketov/ubuntu_cpp
+      - run: make memtest
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: ./server/build/report
