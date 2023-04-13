@@ -18,6 +18,13 @@ TEST(BaseTestLogic, TestOperatorMultiply) {
     ASSERT_NEAR(expression->calculate(), expected, ABS_ERROR);
 }
 
+TEST(BaseTestLogic, NegativeZero) {
+    const char inputBuffer[] = "-0";
+    auto expression = parsePassedExpressionToCalc(inputBuffer);
+    double expected = 0;
+    ASSERT_NEAR(expression->calculate(), expected, ABS_ERROR);
+}
+
 TEST(BaseTestLogic, TestOperatorMinus) {
     const char inputBuffer[] = "5-5";
     auto expression = parsePassedExpressionToCalc(inputBuffer);

@@ -3,14 +3,14 @@ on: push
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: rbeketov/ubuntu_cpp
+    container: rbeketov/ubuntu_cpp_fix
     steps:
     - uses: actions/checkout@v2 
     - run: make build
 
   test:
     runs-on: ubuntu-latest
-    container: rbeketov/ubuntu_cpp
+    container: rbeketov/ubuntu_cpp_fix
     needs: [build]
     steps:
       - uses: actions/checkout@v2
@@ -18,7 +18,7 @@ jobs:
 
   memtest:
     runs-on: ubuntu-latest
-    container: rbeketov/ubuntu_cpp
+    container: rbeketov/ubuntu_cpp_fix
     needs: [test]
     steps:
       - uses: actions/checkout@v2
